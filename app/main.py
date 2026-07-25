@@ -1,5 +1,5 @@
-from app.groq_api import getSummaryOfEmail
 from fastapi import FastAPI
+import app.utils.ai as ai
 
 app = FastAPI()
 
@@ -20,6 +20,13 @@ app = FastAPI()
 # #FALLBACK: if the issue unreleted to any of the categories mentioned in constrainst then the anwer should be other
 # "
 
+# prompt chaining -> FOR DEBUGGING AND AI MODELS
+# 1) get category
+# 2) get summary
+# 3) get deadline if any (if deadline -> place event in user calaender(react tool))
+# 4) get subject
+# 5) get priority
+
 @app.get("/")
 def root():
-    return getSummaryOfEmail()
+    return "hello world"
