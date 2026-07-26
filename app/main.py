@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import app.utils.ai as ai
+# import utils.ai as ai  # developemtn only
 
 app = FastAPI()
 
