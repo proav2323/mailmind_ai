@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-import app.utils.ai as ai
+import utils.ai as ai
 
 app = FastAPI()
 
@@ -21,11 +21,11 @@ app = FastAPI()
 # "
 
 # prompt chaining -> FOR DEBUGGING AND AI MODELS
-# 1) get category
-# 2) get summary
-# 3) get deadline if any (if deadline -> place event in user calaender(react tool))
-# 4) get subject
-# 5) get priority
+# 1) get category -> done
+# 2) get summary -> done
+# 3) get deadline if any (if deadline -> place event in user calaender(react tool)) -> done diealine (not calender tool(later))
+# 4) get subject -> done
+# 5) get priority -> done
 
 @app.get("/")
 def root():
