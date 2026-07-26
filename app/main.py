@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-import utils.ai as ai
+import app.utils.ai as ai
 
 app = FastAPI()
 
