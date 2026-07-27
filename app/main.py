@@ -35,7 +35,7 @@ app = FastAPI()
 class emailItem(BaseModel):
     data: str
 
-async def processEmails():
+async def processEmails(email):
     await asyncio.sleep(1.5) 
     data = ai.getEmailResponse(email.body, email.categories, email.myGivenId)
     return data
