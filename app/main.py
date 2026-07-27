@@ -38,7 +38,7 @@ class emailItem(BaseModel):
 async def processEmails(email):
     try:
        await asyncio.sleep(1.5) 
-       data = ai.getEmailResponse(email.body, email.categories, email.myGivenId)
+       data = ai.getEmailResponse(email['body'], email['categories'], email['myGivenId'])
        return data
     except Exception as e:
         print(e)
