@@ -36,9 +36,12 @@ class emailItem(BaseModel):
     data: str
 
 async def processEmails(email):
-    await asyncio.sleep(1.5) 
-    data = ai.getEmailResponse(email.body, email.categories, email.myGivenId)
-    return data
+    try:
+       await asyncio.sleep(1.5) 
+       data = ai.getEmailResponse(email.body, email.categories, email.myGivenId)
+       return data
+    except Exception as e:
+        print(e)
 
 @app.get("/")
 def root():
@@ -48,6 +51,6 @@ def root():
 async def email(emailData: emailItem):
     emails = loads(emailData.data)
     tasks = [processEmails(email) for email in emails]
-    # result = await asyncio.gather(*tasks)
-    return {"data": []}
+    result = await asyncio.gather(*tasks)
+    return {"data": result}
 
