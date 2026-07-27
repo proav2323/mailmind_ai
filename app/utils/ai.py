@@ -3,6 +3,7 @@ from dotenv import load_dotenv;
 from groq import Groq;
 from pydantic import BaseModel
 from json import loads
+from time import sleep
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -209,3 +210,16 @@ def getDeadline(emailBody):
 
     res = getAiResponse(systemPrompt=systemPromot, userPromt=userPrompt)
     return DEADLINEModel(**loads(res))
+
+def getEmailResponse(emailBody, categories, id):
+       summaryModel = getEmailSummary(emailody=emailBody)
+       sleep(3)
+       categoryModel = getEmailCategory(emailBody=emailBody,categories=categories)
+       sleep(3)
+       deadlineModel = getDeadline(emailBody=emailBody)
+       sleep(3)
+       priotirtyModel = getEmailPrority(emailBody=emailBody)
+       sleep(3)
+       subjectModel = getEmailSubject(emailBody=emailBody)
+
+       return {"summary": summaryModel.summary, "category": categoryModel.category, "deadline": deadlineModel.deadline, "priority": priotirtyModel.priority, "subject": subjectModel.subject, "id": id}

@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI
 import app.utils.ai as ai # production
 # import utils.ai as ai  # developemtn only
@@ -34,28 +35,19 @@ app = FastAPI()
 class emailItem(BaseModel):
     data: str
 
+async def processEmails():
+    await asyncio.sleep(1.5) 
+    data = ai.getEmailResponse(email.body, email.categories, email.myGivenId)
+    return data
+
 @app.get("/")
 def root():
     return "hello world"
 
 @app.post("/email")
-async def email(email: emailItem):
-    emails = loads(email.data)
-    result = []
-    
-    for email in emails:
-       sleep(5)
-       summaryModel = ai.getEmailSummary(emailody=email.body)
-       sleep(3)
-       categoryModel = ai.getEmailCategory(emailBody=email.body,categories=email.categories)
-       sleep(3)
-       deadlineModel = ai.getDeadline(emailBody=email.body)
-       sleep(3)
-       priotirtyModel = ai.getEmailPrority(emailBody=email.body)
-       sleep(3)
-       subjectModel = ai.getEmailSubject(emailBody=email.body)
-
-       result.append({"summary": summaryModel.summary, "category": categoryModel.category, "deadline": deadlineModel.deadline, "priority": priotirtyModel.priority, "subject": subjectModel.subject, id: emails.myGivenId})
-
+async def email(emailData: emailItem):
+    emails = loads(emailData.data)
+    tasks = [processEmails(email) for email in emails]
+    result = await asyncio.gather(*tasks)
     return {"data": result}
 
