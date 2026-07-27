@@ -1,5 +1,5 @@
 import asyncio
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 import app.utils.ai as ai # production
 # import utils.ai as ai  # developemtn only
 from pydantic import BaseModel
@@ -36,13 +36,13 @@ class emailItem(BaseModel):
     data: str
 
 async def processEmails(email):
-    print(email)
     try:
        await asyncio.sleep(1.5) 
        data = ai.getEmailResponse(email.body, email.categories, email.myGivenId)
        return data
     except Exception as e:
         print(e)
+        raise HTTPException(status_code=500, detail=e)
 
 @app.get("/")
 def root():
