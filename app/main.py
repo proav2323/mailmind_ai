@@ -41,20 +41,20 @@ def root():
 
 @app.post("/email")
 async def email(email: emailItem):
-    emailBody = loads(email.emailBody)
-    categories = loads(email.categories)
+    emailBodyD = loads(email.emailBody)
+    categoriesS = loads(email.categories)
 
     print(email)
     
-    summaryModel = ai.getEmailSummary(emailody=emailBody)
+    summaryModel = ai.getEmailSummary(emailody=emailBodyD)
     sleep(3)
-    categoryModel = ai.getEmailCategory(emailBody=emailBody,categories=categories)
+    categoryModel = ai.getEmailCategory(emailBody=emailBodyD,categories=categoriesS)
     sleep(3)
-    deadlineModel = ai.getDeadline(emailBody=emailBody)
+    deadlineModel = ai.getDeadline(emailBody=emailBodyD)
     sleep(3)
-    priotirtyModel = ai.getEmailPrority(emailBody=emailBody)
+    priotirtyModel = ai.getEmailPrority(emailBody=emailBodyD)
     sleep(3)
-    subjectModel = ai.getEmailSubject(emailBody=emailBody)
+    subjectModel = ai.getEmailSubject(emailBody=emailBodyD)
     print(summaryModel)
     print(categoryModel)
     print(deadlineModel)
