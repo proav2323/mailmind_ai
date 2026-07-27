@@ -1,6 +1,8 @@
 from fastapi import FastAPI
-import app.utils.ai as ai
+import app.utils.ai as ai # production
 # import utils.ai as ai  # developemtn only
+from pydantic import BaseModel
+from time import sleep
 
 app = FastAPI()
 
@@ -28,6 +30,35 @@ app = FastAPI()
 # 4) get subject -> done
 # 5) get priority -> done
 
+class emailItem(BaseModel):
+    emailBody: dict
+    categories: list[dict]
+
 @app.get("/")
 def root():
     return "hello world"
+
+@app.post("/email")
+def email(email: emailItem):
+    emailBody = email.emailBody
+    categories = email.categories
+
+    print(email)
+    
+    summaryModel = ai.getEmailSummary(emailody=emailBody)
+    sleep(3)
+    categoryModel = ai.getEmailCategory(emailBody=emailBody,categories=categories)
+    sleep(3)
+    deadlineModel = ai.getDeadline(emailBody=emailBody)
+    sleep(3)
+    priotirtyModel = ai.getEmailPrority(emailBody=emailBody)
+    sleep(3)
+    subjectModel = ai.getEmailSubject(emailBody=emailBody)
+    print(summaryModel)
+    print(categoryModel)
+    print(deadlineModel)
+    print(priotirtyModel)
+    print(subjectModel)
+
+    return {"summary": summaryModel.summary, "category": categoryModel.category, "deadline": deadlineModel.deadline, "priority": priotirtyModel.priority, "subject": subjectModel.subject}
+
