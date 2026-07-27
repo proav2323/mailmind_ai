@@ -3,8 +3,8 @@ from fastapi import FastAPI, HTTPException, status
 import app.utils.ai as ai # production
 # import utils.ai as ai  # developemtn only
 from pydantic import BaseModel
-from time import sleep
 from json import loads
+from aiolimiter import AsyncLimiter
 
 app = FastAPI()
 
@@ -31,18 +31,22 @@ app = FastAPI()
 # 3) get deadline if any (if deadline -> place event in user calaender(react tool)) -> done diealine (not calender tool(later))
 # 4) get subject -> done
 # 5) get priority -> done
+rate_limiter = AsyncLimiter(max_rate=15, time_period=60)
+concurrency_semaphore = asyncio.Semaphore(3)
 
 class emailItem(BaseModel):
     data: str
 
 async def processEmails(email):
-    try:
-       await asyncio.sleep(1.5) 
-       data = await ai.getEmailResponse(email['body'], email['categories'], email['myGivenId'])
-       return data
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail=e)
+    async with rate_limiter:
+        async with concurrency_semaphore:
+             try:
+                await asyncio.sleep(1.5) 
+                data = await ai.getEmailResponse(email['body'], email['categories'], email['myGivenId'])
+                return data
+             except Exception as e:
+                 print(e)
+                 raise HTTPException(status_code=500, detail=e)
 
 @app.get("/")
 def root():
