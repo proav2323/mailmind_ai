@@ -36,6 +36,7 @@ class emailItem(BaseModel):
     data: str
 
 async def processEmails(email):
+    print(email)
     try:
        await asyncio.sleep(1.5) 
        data = ai.getEmailResponse(email.body, email.categories, email.myGivenId)
