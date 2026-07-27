@@ -48,11 +48,12 @@ deadlineScema = DEADLINEModel.model_json_schema()
 #     res = client.chat.completions.create(messages=messages, model=model, temperature=0, max_tokens=MAX_TOKEN)
 #     return res.choices[0].message.content
 
-async def getAiResponse(systemPrompt, userPromt): # gemini response 
+async def getAiResponse(systemPrompt, userPromt, response_schema): # gemini response 
     res = await geminiClinet.aio.models.generate_content(model=geminiModel,contents=userPromt, config = types.GenerateContentConfig(
                 system_instruction=systemPrompt,
                 max_output_tokens=MAX_TOKEN,
-                temperature=0.1
+                response_mime_type="application/json",
+                response_schema=response_schema,
             ))
     return res.text
 
@@ -99,7 +100,7 @@ async def getEmailCategory(emailBody, categories):
     userPrompt = f"""here's the user email: 
     {text}, {html}
    """
-    res = await getAiResponse(systemPrompt=systemPrompt, userPromt=userPrompt)
+    res = await getAiResponse(systemPrompt=systemPrompt, userPromt=userPrompt, response_schema=categoryScema)
     categoryJson = loads(res)
     return categoryModel(**categoryJson)
 
@@ -123,7 +124,7 @@ async def getEmailSummary(emailody):
     userPropmt = f"""here is the email for you summarize: 
     {text}, {html}
     """
-    res = await getAiResponse(systemPrompt=systemPrompt, userPromt=userPropmt)
+    res = await getAiResponse(systemPrompt=systemPrompt, userPromt=userPropmt, response_schema=summaryScema)
     return SUMMARYModel(**loads(res))
 
 async def getEmailPrority(emailBody):
@@ -163,7 +164,7 @@ async def getEmailPrority(emailBody):
     userPrompt = f""" here is the email to priotize:
              {text}, {html}
     """
-    res = await getAiResponse(systemPrompt=systemPrompt,userPromt=userPrompt)
+    res = await getAiResponse(systemPrompt=systemPrompt,userPromt=userPrompt, response_schema=priorityScema)
     return priorityModel(**loads(res))
 
 async def getEmailSubject(emailBody):
@@ -193,7 +194,7 @@ async def getEmailSubject(emailBody):
     {text}, {html}
     """
 
-    res = await getAiResponse(systemPrompt=systemPromot, userPromt=userPrompt)
+    res = await getAiResponse(systemPrompt=systemPromot, userPromt=userPrompt, response_schema=subjectScema)
     return SUBJECTModel(**loads(res))
 
 async def getDeadline(emailBody):
@@ -223,7 +224,7 @@ async def getDeadline(emailBody):
     {text}, {html}
     """
 
-    res = await getAiResponse(systemPrompt=systemPromot, userPromt=userPrompt)
+    res = await getAiResponse(systemPrompt=systemPromot, userPromt=userPrompt, response_schema=deadlineScema)
     return DEADLINEModel(**loads(res))
 
 async def getEmailResponse(emailBody, categories, id):
