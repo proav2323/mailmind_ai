@@ -101,6 +101,7 @@ async def getEmailCategory(emailBody, categories):
     {text}, {html}
    """
     res = await getAiResponse(systemPrompt=systemPrompt, userPromt=userPrompt, response_schema=categoryScema)
+    print(res)
     categoryJson = loads(res)
     return categoryModel(**categoryJson)
 
@@ -125,6 +126,7 @@ async def getEmailSummary(emailody):
     {text}, {html}
     """
     res = await getAiResponse(systemPrompt=systemPrompt, userPromt=userPropmt, response_schema=summaryScema)
+    print(res)
     return SUMMARYModel(**loads(res))
 
 async def getEmailPrority(emailBody):
@@ -165,6 +167,7 @@ async def getEmailPrority(emailBody):
              {text}, {html}
     """
     res = await getAiResponse(systemPrompt=systemPrompt,userPromt=userPrompt, response_schema=priorityScema)
+    print(res)
     return priorityModel(**loads(res))
 
 async def getEmailSubject(emailBody):
@@ -195,6 +198,7 @@ async def getEmailSubject(emailBody):
     """
 
     res = await getAiResponse(systemPrompt=systemPromot, userPromt=userPrompt, response_schema=subjectScema)
+    print(res)
     return SUBJECTModel(**loads(res))
 
 async def getDeadline(emailBody):
@@ -225,6 +229,7 @@ async def getDeadline(emailBody):
     """
 
     res = await getAiResponse(systemPrompt=systemPromot, userPromt=userPrompt, response_schema=deadlineScema)
+    print(res)
     return DEADLINEModel(**loads(res))
 
 async def getEmailResponse(emailBody, categories, id):
