@@ -3,6 +3,7 @@ import app.utils.ai as ai # production
 # import utils.ai as ai  # developemtn only
 from pydantic import BaseModel
 from time import sleep
+from json import loads
 
 app = FastAPI()
 
@@ -31,8 +32,8 @@ app = FastAPI()
 # 5) get priority -> done
 
 class emailItem(BaseModel):
-    emailBody: dict
-    categories: list[dict]
+    emailBody: str
+    categories: str
 
 @app.get("/")
 def root():
@@ -40,8 +41,8 @@ def root():
 
 @app.post("/email")
 def email(email: emailItem):
-    emailBody = email.emailBody
-    categories = email.categories
+    emailBody = loads(email.emailBody)
+    categories = loads(email.categories)
 
     print(email)
     
