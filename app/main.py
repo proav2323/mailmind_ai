@@ -42,8 +42,10 @@ async def processEmails(email):
         async with concurrency_semaphore:
              try:
                 await asyncio.sleep(1.5) 
-                data = await ai.getEmailResponse(email['body'], email['categories'], email['myGivenId'])
-                return data
+                data = await ai.getAiEmailResponse(email['body'], email['categories'])
+                returnData = {"category": data['category'], "id":  email['myGivenId'], "summary": data['summary'], "deadline": data['deadline'], "subject": data['subject'], "priority": data['priority']}
+                
+                return returnData
              except Exception as e:
                  print(e)
                  raise HTTPException(status_code=500, detail=e)
