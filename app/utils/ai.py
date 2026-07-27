@@ -7,7 +7,8 @@ from time import sleep
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-model="qwen/qwen3.6-27b"
+model="llama-3.1-8b-instant"
+MAX_TOKEN=200
 
 class categoryModel(BaseModel):
     category: str
@@ -38,7 +39,7 @@ def getAiResponse(systemPrompt, userPromt):
     messages.append({"role": "system", "content": systemPrompt})
     messages.append({"role": "user", "content": userPromt})
 
-    res = client.chat.completions.create(messages=messages, model=model, temperature=0)
+    res = client.chat.completions.create(messages=messages, model=model, temperature=0, max_token=MAX_TOKEN)
     return res.choices[0].message.content
 
 
@@ -109,6 +110,7 @@ def getEmailSummary(emailody):
     {text}, {html}
     """
     res = getAiResponse(systemPrompt=systemPrompt, userPromt=userPropmt)
+    print(res.usage.total_tokens)
     return SUMMARYModel(**loads(res))
 
 def getEmailPrority(emailBody):
@@ -212,14 +214,15 @@ def getDeadline(emailBody):
     return DEADLINEModel(**loads(res))
 
 def getEmailResponse(emailBody, categories, id):
-       summaryModel = getEmailSummary(emailody=emailBody)
-       sleep(3)
-       categoryModel = getEmailCategory(emailBody=emailBody,categories=categories)
-       sleep(3)
-       deadlineModel = getDeadline(emailBody=emailBody)
-       sleep(3)
-       priotirtyModel = getEmailPrority(emailBody=emailBody)
-       sleep(3)
-       subjectModel = getEmailSubject(emailBody=emailBody)
+    summaryModel = getEmailSummary(emailody=emailBody)
+    #    sleep(3)
+    #    categoryModel = getEmailCategory(emailBody=emailBody,categories=categories)
+    #    sleep(3)
+    #    deadlineModel = getDeadline(emailBody=emailBody)
+    #    sleep(3)
+    #    priotirtyModel = getEmailPrority(emailBody=emailBody)
+    #    sleep(3)
+    #    subjectModel = getEmailSubject(emailBody=emailBody)
 
-       return {"summary": summaryModel.summary, "category": categoryModel.category, "deadline": deadlineModel.deadline, "priority": priotirtyModel.priority, "subject": subjectModel.subject, "id": id}
+    #    return {"summary": summaryModel.summary, "category": categoryModel.category, "deadline": deadlineModel.deadline, "priority": priotirtyModel.priority, "subject": subjectModel.subject, "id": id}
+    return {"summary": summaryModel.summary}
