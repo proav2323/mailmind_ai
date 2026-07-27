@@ -32,8 +32,7 @@ app = FastAPI()
 # 5) get priority -> done
 
 class emailItem(BaseModel):
-    emailBody: str
-    categories: str
+    data: str
 
 @app.get("/")
 def root():
@@ -41,25 +40,22 @@ def root():
 
 @app.post("/email")
 async def email(email: emailItem):
-    emailBodyD = loads(email.emailBody)
-    categoriesS = loads(email.categories)
-
-    print(email)
+    emails = loads(email.data)
+    result = []
     
-    summaryModel = ai.getEmailSummary(emailody=emailBodyD)
-    sleep(3)
-    categoryModel = ai.getEmailCategory(emailBody=emailBodyD,categories=categoriesS)
-    sleep(3)
-    deadlineModel = ai.getDeadline(emailBody=emailBodyD)
-    sleep(3)
-    priotirtyModel = ai.getEmailPrority(emailBody=emailBodyD)
-    sleep(3)
-    subjectModel = ai.getEmailSubject(emailBody=emailBodyD)
-    print(summaryModel)
-    print(categoryModel)
-    print(deadlineModel)
-    print(priotirtyModel)
-    print(subjectModel)
+    for email in emails:
+       sleep(5)
+       summaryModel = ai.getEmailSummary(emailody=email.body)
+       sleep(3)
+       categoryModel = ai.getEmailCategory(emailBody=email.body,categories=email.categories)
+       sleep(3)
+       deadlineModel = ai.getDeadline(emailBody=email.body)
+       sleep(3)
+       priotirtyModel = ai.getEmailPrority(emailBody=email.body)
+       sleep(3)
+       subjectModel = ai.getEmailSubject(emailBody=email.body)
 
-    return {"summary": summaryModel.summary, "category": categoryModel.category, "deadline": deadlineModel.deadline, "priority": priotirtyModel.priority, "subject": subjectModel.subject}
+       result.append({"summary": summaryModel.summary, "category": categoryModel.category, "deadline": deadlineModel.deadline, "priority": priotirtyModel.priority, "subject": subjectModel.subject, id: emails.myGivenId})
+
+    return {"data": result}
 
