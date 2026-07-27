@@ -14,7 +14,7 @@ model="llama-3.1-8b-instant"
 geminiClinet = genai.Client()
 geminiModel="gemini-3.5-flash-lite"
 
-MAX_TOKEN=200
+MAX_TOKEN=250
 
 class categoryModel(BaseModel):
     category: str
@@ -110,7 +110,7 @@ async def getEmailSummary(emailody):
     html = emailody['html']
 
     systemPrompt = f"""
-    you are automated, highly accurate email summarizer. your only task is to summarize provided email text.
+    you are automated, highly accurate email summarizer. your only task is to summarize provided email text in about 100-200 words.
     NOTE: email text can plain text or html.
 
     OUTPUT: RETURN YOUR RESPONSE IN JSON FORMAT USING THIS SCHEMA {summaryScema}
