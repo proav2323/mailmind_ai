@@ -4,10 +4,16 @@ from groq import Groq;
 from pydantic import BaseModel
 from json import loads
 from time import sleep
+from google import genai
+from google.genai import types
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 model="llama-3.1-8b-instant"
+
+geminiClinet = genai.Client()
+geminiModel="gemini-2.5-flash-lite"
+
 MAX_TOKEN=200
 
 class categoryModel(BaseModel):
@@ -34,16 +40,24 @@ class DEADLINEModel(BaseModel):
     deadline: str
 deadlineScema = DEADLINEModel.model_json_schema()
 
-def getAiResponse(systemPrompt, userPromt):
-    messages = []
-    messages.append({"role": "system", "content": systemPrompt})
-    messages.append({"role": "user", "content": userPromt})
+# def getAiResponse(systemPrompt, userPromt): # groq response 
+#     messages = []
+#     messages.append({"role": "system", "content": systemPrompt})
+#     messages.append({"role": "user", "content": userPromt})
 
-    res = client.chat.completions.create(messages=messages, model=model, temperature=0, max_tokens=MAX_TOKEN)
-    return res.choices[0].message.content
+#     res = client.chat.completions.create(messages=messages, model=model, temperature=0, max_tokens=MAX_TOKEN)
+#     return res.choices[0].message.content
+
+async def getAiResponse(systemPrompt, userPromt): # gemini response 
+    res = await geminiClinet.aio.models.generate_content(model=geminiModel,contents=userPromt, config = types.GenerateContentConfig(
+                system_instruction=systemPrompt,
+                max_output_tokens=MAX_TOKEN,
+                temperature=0.1
+            ))
+    return res.text
 
 
-def getEmailCategory(emailBody, categories):
+async def getEmailCategory(emailBody, categories):
     text = emailBody['text']
     html = emailBody['html']
 
@@ -85,11 +99,11 @@ def getEmailCategory(emailBody, categories):
     userPrompt = f"""here's the user email: 
     {text}, {html}
    """
-    res = getAiResponse(systemPrompt=systemPrompt, userPromt=userPrompt)
+    res = await getAiResponse(systemPrompt=systemPrompt, userPromt=userPrompt)
     categoryJson = loads(res)
     return categoryModel(**categoryJson)
 
-def getEmailSummary(emailody):
+async def getEmailSummary(emailody):
     text = emailody['text']
     html = emailody['html']
 
@@ -109,11 +123,10 @@ def getEmailSummary(emailody):
     userPropmt = f"""here is the email for you summarize: 
     {text}, {html}
     """
-    res = getAiResponse(systemPrompt=systemPrompt, userPromt=userPropmt)
-    print(res.usage.total_tokens)
+    res = await getAiResponse(systemPrompt=systemPrompt, userPromt=userPropmt)
     return SUMMARYModel(**loads(res))
 
-def getEmailPrority(emailBody):
+async def getEmailPrority(emailBody):
     text = emailBody['text']
     html = emailBody['html']
 
@@ -150,10 +163,10 @@ def getEmailPrority(emailBody):
     userPrompt = f""" here is the email to priotize:
              {text}, {html}
     """
-    res = getAiResponse(systemPrompt=systemPrompt,userPromt=userPrompt)
+    res = await getAiResponse(systemPrompt=systemPrompt,userPromt=userPrompt)
     return priorityModel(**loads(res))
 
-def getEmailSubject(emailBody):
+async def getEmailSubject(emailBody):
     text = emailBody['text']
     html = emailBody['html']
 
@@ -180,10 +193,10 @@ def getEmailSubject(emailBody):
     {text}, {html}
     """
 
-    res = getAiResponse(systemPrompt=systemPromot, userPromt=userPrompt)
+    res = await getAiResponse(systemPrompt=systemPromot, userPromt=userPrompt)
     return SUBJECTModel(**loads(res))
 
-def getDeadline(emailBody):
+async def getDeadline(emailBody):
     text = emailBody['text']
     html = emailBody['html']
 
@@ -210,19 +223,18 @@ def getDeadline(emailBody):
     {text}, {html}
     """
 
-    res = getAiResponse(systemPrompt=systemPromot, userPromt=userPrompt)
+    res = await getAiResponse(systemPrompt=systemPromot, userPromt=userPrompt)
     return DEADLINEModel(**loads(res))
 
-def getEmailResponse(emailBody, categories, id):
-    summaryModel = getEmailSummary(emailody=emailBody)
-    #    sleep(3)
-    #    categoryModel = getEmailCategory(emailBody=emailBody,categories=categories)
-    #    sleep(3)
-    #    deadlineModel = getDeadline(emailBody=emailBody)
-    #    sleep(3)
-    #    priotirtyModel = getEmailPrority(emailBody=emailBody)
-    #    sleep(3)
-    #    subjectModel = getEmailSubject(emailBody=emailBody)
+async def getEmailResponse(emailBody, categories, id):
+    summaryModel = await getEmailSummary(emailody=emailBody)
+    sleep(3)
+    categoryModel = await getEmailCategory(emailBody=emailBody,categories=categories)
+    sleep(3)
+    deadlineModel = await getDeadline(emailBody=emailBody)
+    sleep(3)
+    priotirtyModel = await getEmailPrority(emailBody=emailBody)
+    sleep(3)
+    subjectModel = await getEmailSubject(emailBody=emailBody)
 
-    #    return {"summary": summaryModel.summary, "category": categoryModel.category, "deadline": deadlineModel.deadline, "priority": priotirtyModel.priority, "subject": subjectModel.subject, "id": id}
-    return {"summary": summaryModel.summary}
+    return {"summary": summaryModel.summary, "category": categoryModel.category, "deadline": deadlineModel.deadline, "priority": priotirtyModel.priority, "subject": subjectModel.subject, "id": id}
