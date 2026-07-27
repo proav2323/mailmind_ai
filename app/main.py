@@ -47,7 +47,9 @@ def root():
 @app.post("/email")
 async def email(emailData: emailItem):
     emails = loads(emailData.data)
+    print(emails)
     tasks = [processEmails(email) for email in emails]
+    print("woring till here")
     result = await asyncio.gather(*tasks)
     return {"data": result}
 
