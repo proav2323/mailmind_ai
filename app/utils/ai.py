@@ -240,7 +240,7 @@ async def getEmailResponse(emailBody, categories, id):
     deadlineModel = await getDeadline(emailBody=emailBody)
     sleep(3)
     priotirtyModel = await getEmailPrority(emailBody=emailBody)
-    sleep(3)
+    sleep(2)
     subjectModel = await getEmailSubject(emailBody=emailBody)
 
     return {"summary": summaryModel.summary, "category": categoryModel.category, "deadline": deadlineModel.deadline, "priority": priotirtyModel.priority, "subject": subjectModel.subject, "id": id}
