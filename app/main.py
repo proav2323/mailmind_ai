@@ -40,7 +40,7 @@ def root():
     return "hello world"
 
 @app.post("/email")
-def email(email: emailItem):
+async def email(email: emailItem):
     emailBody = loads(email.emailBody)
     categories = loads(email.categories)
 
