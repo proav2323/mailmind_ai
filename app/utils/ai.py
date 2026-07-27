@@ -39,7 +39,7 @@ def getAiResponse(systemPrompt, userPromt):
     messages.append({"role": "system", "content": systemPrompt})
     messages.append({"role": "user", "content": userPromt})
 
-    res = client.chat.completions.create(messages=messages, model=model, temperature=0, max_token=MAX_TOKEN)
+    res = client.chat.completions.create(messages=messages, model=model, temperature=0, max_tokens=MAX_TOKEN)
     return res.choices[0].message.content
 
 
