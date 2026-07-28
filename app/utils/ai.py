@@ -57,6 +57,8 @@ async def getAiEmailResponse(emailBody, categories): # gemini response
     - "deadline": Extract any explicit or implied date/time constraint (e.g., "YYYY-MM-DD", "Today by 5:00 PM", "End of Week"). If no deadline is present, set value to null.
     - "summary": A crisp 1–2 sentence summary explaining the core message and any required action.
 
+    #FALLABCK: IF YOUR CATEGORY NOT MATCHES IN ANY OF THE GIVEN CATEGORIES RETURN OTHER
+
     ### Priority Rules:
     - High: Urgent requests, immediate blockers, server/system issues, or strict deadlines within 24-48 hours.
     - Medium: Standard work requests, follow-ups requiring an answer, or task requests with flexible/longer deadlines.
@@ -83,7 +85,7 @@ async def getAiEmailResponse(emailBody, categories): # gemini response
 
     Output:
     {{
-    "category": "Newsletter & Marketing",
+    "category": "other",
     "subject": "March product newsletter and new features",
     "priority": "Low",
     "deadline": null,
