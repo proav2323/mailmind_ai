@@ -13,7 +13,7 @@ model="llama-3.1-8b-instant"
 geminiClinet = genai.Client()
 geminiModel="gemini-3.5-flash-lite"
 
-MAX_TOKEN=250
+MAX_TOKEN=600
 
 class EMAILMODEL(BaseModel):
     category: str
@@ -34,8 +34,8 @@ emailScema = EMAILMODEL.model_json_schema()
 #     return res.choices[0].message.content
 
 async def getAiEmailResponse(emailBody, categories): # gemini response 
-    text = emailBody['text']
-    html = emailBody['html']
+    text = emailBody.text
+    html = emailBody.html
 
     userPrompt = f""" here's the email to analyze:
     {text}, {html}
