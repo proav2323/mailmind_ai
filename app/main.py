@@ -43,7 +43,7 @@ async def processEmails(email):
              try:
                 await asyncio.sleep(1.5) 
                 data = await ai.getAiEmailResponse(email['body'], email['categories'])
-                returnData = {"category": data['category'], "id":  email['myGivenId'], "summary": data['summary'], "deadline": data['deadline'], "subject": data['subject'], "priority": data['priority']}
+                returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority}
                 
                 return returnData
              except Exception as e:

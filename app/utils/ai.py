@@ -34,8 +34,8 @@ emailScema = EMAILMODEL.model_json_schema()
 #     return res.choices[0].message.content
 
 async def getAiEmailResponse(emailBody, categories): # gemini response 
-    text = emailBody.text
-    html = emailBody.html
+    text = emailBody['text']
+    html = emailBody['html']
 
     userPrompt = f""" here's the email to analyze:
     {text}, {html}
