@@ -34,21 +34,35 @@ app = FastAPI()
 rate_limiter = AsyncLimiter(max_rate=10, time_period=60)
 concurrency_semaphore = asyncio.Semaphore(3)
 
+def chunk_list(lst, size):
+    return [lst[i:i + size] for i in range(0, len(lst), size)]
+
 class emailItem(BaseModel):
     data: str
 
-async def processEmails(email):
-    async with rate_limiter:
-        async with concurrency_semaphore:
-             try:
-                await asyncio.sleep(1.5) 
-                data = await ai.getAiEmailResponse(email['body'], email['categories'])
-                returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority}
+# async def processEmails(email):
+#     async with rate_limiter:
+#         async with concurrency_semaphore:
+#              try:
+#                 await asyncio.sleep(1.5) 
+#                 data = await ai.getAiEmailResponse(email['body'], email['categories'])
+#                 returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority}
                 
-                return returnData
-             except Exception as e:
-                 print(e)
-                 raise HTTPException(status_code=500, detail=e)
+#                 return returnData
+#              except Exception as e:
+#                  print(e)
+#                  raise HTTPException(status_code=500, detail=e)
+
+async def processEmails(email):
+    try:
+        await asyncio.sleep(1.5) 
+        data = await ai.getAiEmailResponse(email['body'], email['categories'])
+        returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority}
+                
+        return returnData
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=e)
 
 @app.get("/")
 def root():
@@ -57,8 +71,19 @@ def root():
 @app.post("/email")
 async def email(emailData: emailItem):
     emails = loads(emailData.data)
-    tasks = [processEmails(email) for email in emails]
-    result = await asyncio.gather(*tasks)
-
-    return {"data": result}
+    email_batches = chunk_list(emails, 10)
+    results = []
+    
+    for index, batch in enumerate(email_batches):
+        print(f"Executing batch {index + 1}/{len(email_batches)}...")
+        
+        batch_tasks = [processEmails(e) for e in batch]
+        batch_results = await asyncio.gather(*batch_tasks)
+        results.extend(batch_results)
+        
+        if index < len(email_batches) - 1:
+            print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
+            await asyncio.sleep(65)
+            
+    return {"data": results}
 
