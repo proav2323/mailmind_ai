@@ -54,7 +54,7 @@ async def getAiEmailResponse(emailBody, categories): # gemini response
     - "category": Choose exactly ONE from: [{categoriesText}]
     - "subject": A concise, clear topic title summarizing the email (max 8 words). Do not simply repeat "Re:" headers—summarize the actual content.
     - "priority": Assign "High", "Medium", or "Low" based on the Priority Rules below.
-    - "deadline": Extract any explicit or implied date/time constraint (e.g., "YYYY-MM-DD", "Today by 5:00 PM", "End of Week"). If no deadline is     present, set value to null.
+    - "deadline": Extract any explicit or implied date/time constraint (e.g., "YYYY-MM-DD", "Today by 5:00 PM", "End of Week"). If no deadline is present, set value to null.
     - "summary": A crisp 1–2 sentence summary explaining the core message and any required action.
 
     ### Priority Rules:
