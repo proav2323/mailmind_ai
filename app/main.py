@@ -31,7 +31,7 @@ app = FastAPI()
 # 3) get deadline if any (if deadline -> place event in user calaender(react tool)) -> done diealine (not calender tool(later))
 # 4) get subject -> done
 # 5) get priority -> done
-rate_limiter = AsyncLimiter(max_rate=15, time_period=60)
+rate_limiter = AsyncLimiter(max_rate=10, time_period=60)
 concurrency_semaphore = asyncio.Semaphore(3)
 
 class emailItem(BaseModel):
