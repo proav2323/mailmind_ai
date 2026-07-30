@@ -40,7 +40,8 @@ class emailItem(BaseModel):
 async def processEmails(email):
     try:
         data = await ai.getAiEmailResponse(email['body'], email['categories'])
-        returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority}
+        returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority,     "importance": data.importance, "urgency": data.urgency,"senderImportance": data.senderImportance,
+    "requireAction": data.requireAction}
                 
         return returnData
     except Exception as e:
