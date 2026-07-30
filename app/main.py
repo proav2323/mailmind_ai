@@ -37,33 +37,10 @@ def chunk_list(lst, size):
 class emailItem(BaseModel):
     data: str
 
-# async def processEmails(email):
-#     async with rate_limiter:
-#         async with concurrency_semaphore:
-#              try:
-#                 await asyncio.sleep(1.5) 
-#                 data = await ai.getAiEmailResponse(email['body'], email['categories'])
-#                 returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority}
-                
-#                 return returnData
-#              except Exception as e:
-#                  print(e)
-#                  raise HTTPException(status_code=500, detail=e)
-
 async def processEmails(email):
     try:
         data = await ai.getAiEmailResponse(email['body'], email['categories'])
         returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority}
-                
-        return returnData
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail=e)
-
-async def processEmailsPrioirty(email):
-    try:
-        data = await ai.getEmailsPriority(email['body'])
-        returnData = {"id":  email['myGivenId'],"priority": data.priority}
                 
         return returnData
     except Exception as e:
@@ -84,25 +61,6 @@ async def email(emailData: emailItem):
         print(f"Executing batch {index + 1}/{len(email_batches)}...")
         
         batch_tasks = [processEmails(e) for e in batch]
-        batch_results = await asyncio.gather(*batch_tasks)
-        results.extend(batch_results)
-        
-        if index < len(email_batches) - 1:
-            print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
-            await asyncio.sleep(65)
-            
-    return {"data": results}
-
-@app.post("/priority")
-async def emailPriority(emailData: emailItem):
-    emails = loads(emailData.data)
-    email_batches = chunk_list(emails, 10)
-    results = []
-    
-    for index, batch in enumerate(email_batches):
-        print(f"Executing batch {index + 1}/{len(email_batches)}...")
-        
-        batch_tasks = [processEmailsPrioirty(e) for e in batch]
         batch_results = await asyncio.gather(*batch_tasks)
         results.extend(batch_results)
         

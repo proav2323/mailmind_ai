@@ -24,19 +24,6 @@ class EMAILMODEL(BaseModel):
 
 emailScema = EMAILMODEL.model_json_schema()
 
-class PriorityModel(BaseModel):
-    priority: str
-prioritySchema = PriorityModel.model_json_schema()
-
-
-# def getAiResponse(systemPrompt, userPromt): # groq response 
-#     messages = []
-#     messages.append({"role": "system", "content": systemPrompt})
-#     messages.append({"role": "user", "content": userPromt})
-
-#     res = client.chat.completions.create(messages=messages, model=model, temperature=0, max_tokens=MAX_TOKEN)
-#     return res.choices[0].message.content
-
 async def getAiEmailResponse(emailBody, categories): # gemini response 
     text = emailBody['text']
     html = emailBody['html']
@@ -106,63 +93,3 @@ async def getAiEmailResponse(emailBody, categories): # gemini response
     ))
 
     return EMAILMODEL(**loads(res.text))
-
-async def getEmailsPriority(emailBody):
-    text = emailBody['text']
-    html = emailBody['html']
-
-    userPrompt = f""" here's the email to analyze:
-    {text}, {html}
-    """
-
-    systemPrompt = f"""
-        You are an expert AI Email Assistant. Your task is to analyze an incoming email and extract structured key information.
-    
-        ### Core Guidelines:
-        1. Output MUST be valid, raw JSON (no additional conversation, explanations, or preamble).
-        2. Follow the key specifications strictly:
-        - "priority": Assign "High", "Medium", or "Low" based on the Priority Rules below.
-
-        ### Priority Rules:
-        - High: Urgent requests, immediate blockers, server/system issues, or strict deadlines within 24-48 hours.
-        - Medium: Standard work requests, follow-ups requiring an answer, or task requests with flexible/longer deadlines.
-        - Low: Informational (FYI) emails, newsletters, non-urgent updates, marketing, or general chat.
-        - Expired: if the deadline is past todays date
-    
-        ---
-    
-        ### Few-Shot Examples
-    
-        Input:
-        "Hi John, The client presentation is moved up to tomorrow morning at 10 AM. We need the final financial charts updated by 8 AM tomorrow so we can     review. Let me know if you hit any roadblocks."
-    
-        Output:
-        {{
-        "priority": "High",
-        }}
-    
-        Input:
-        "Hey Team, submit this assignment by 26-07-2026"
-    
-        Output:
-        {{
-        "priority": "Expired",
-        }}
-
-        Input:
-        "Hey Team, Here is our monthly product newsletter! Check out our new features released in March, including dark mode support and     performance     tweaks. Enjoy your weekend!"
-
-        Output:
-        {{
-        "priority": "Low",
-        }}
-        """
-    
-    res = await geminiClinet.aio.models.generate_content(model=geminiModel,contents=userPrompt, config = types.GenerateContentConfig(
-                    system_instruction=systemPrompt,
-                    max_output_tokens=MAX_TOKEN,
-                    response_mime_type="application/json",
-                    response_schema=prioritySchema,
-    ))
-
-    return PriorityModel(**loads(res.text))
