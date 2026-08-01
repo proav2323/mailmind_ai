@@ -13,7 +13,7 @@ model="llama-3.1-8b-instant"
 geminiClinet = genai.Client()
 geminiModel="gemini-3.5-flash-lite"
 
-MAX_TOKEN=600
+MAX_TOKEN=1000
 
 class EMAILMODEL(BaseModel):
     category: str
@@ -25,6 +25,7 @@ class EMAILMODEL(BaseModel):
     urgency: int
     senderImportance: int
     requireAction: bool
+    tags: list[str]
 
 emailScema = EMAILMODEL.model_json_schema()
 
@@ -152,6 +153,14 @@ async def getAiEmailResponse(emailBody, categories): # gemini response
   Upload document
 
   false if the email is only informational.
+- "tags": Return relevant keywords.
+  
+  Example:
+  [
+  "DBMS",
+  "Assignment",
+  "Semester 5"
+  ]
 
 #FALLABCK: IF YOUR CATEGORY NOT MATCHES IN ANY OF THE GIVEN CATEGORIES RETURN OTHER
 
@@ -179,6 +188,7 @@ async def getAiEmailResponse(emailBody, categories): # gemini response
     "urgency": 9,
     "senderImportance": 8,
     "requiresAction": true,
+    "tags": ["Client Presentation", "Financial Charts", "Deadline"],
     }}
 
     Input:
@@ -195,6 +205,7 @@ async def getAiEmailResponse(emailBody, categories): # gemini response
     "urgency": 0,
     "senderImportance": 1,
     "requiresAction": false,
+    "tags": ["Product Newsletter", "New Features", "March Update","Newsletter"],
     }}
     """
 
