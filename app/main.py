@@ -98,11 +98,6 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
         print("Step 2: Processing results... and calling backend API to store results in database")
         try:
            response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": results, "emails": emails, "userId": userId})
-           if (response.status_code == 200):
-               print("Results successfully stored in the database.")
-           else:
-               print(f"Failed to store results in the database. Status code: {response.status_code}, Response: {response.text}")
-
         except requests.exceptions.Timeout:
            print("The request timed out.")
         except requests.exceptions.RequestException as e:
