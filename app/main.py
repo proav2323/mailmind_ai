@@ -9,6 +9,7 @@ from upstash_workflow.fastapi import Serve
 from upstash_workflow import AsyncWorkflowContext
 from dotenv import load_dotenv
 import requests
+from qstash import Receiver
 
 load_dotenv()
 app = FastAPI()
@@ -60,7 +61,10 @@ async def processEmails(email):
 def root():
     return "hello world"
 
-@serve.post("/email")
+@serve.post("/email", receiver=Receiver(
+        current_signing_key=os.environ["QSTASH_CURRENT_SIGNING_KEY"],
+        next_signing_key=os.environ["QSTASH_NEXT_SIGNING_KEY"],
+    ))
 async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
     results = []
     emailData = context.request_payload
