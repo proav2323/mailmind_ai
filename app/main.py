@@ -47,15 +47,10 @@ class emailItem(BaseModel):
     userId: str
 
 async def processEmails(email):
-    try:
         data = await ai.getAiEmailResponse(email['body'], email['categories'])
         returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority,     "importance": data.importance, "urgency": data.urgency,"senderImportance": data.senderImportance,
     "requireAction": data.requireAction, "tags": data.tags}
-                
         return returnData
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail=e)
 
 @app.get("/")
 def root():
@@ -96,11 +91,6 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
 
     async def _step2() -> None:
         print("Step 2: Processing results... and calling backend API to store results in database")
-        try:
-           response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": results, "emails": emails, "userId": userId})
-        except requests.exceptions.Timeout:
-           print("The request timed out.")
-        except requests.exceptions.RequestException as e:
-           print(f"An error occurred: {e}")
+        response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": results, "emails": emails, "userId": userId})
 
     await context.run("step-2", _step2)
