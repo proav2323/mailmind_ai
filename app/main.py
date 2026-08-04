@@ -1,3 +1,4 @@
+import asyncio
 import os
 from fastapi import FastAPI, HTTPException, status
 import app.utils.ai as ai # production
@@ -72,16 +73,17 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
     emailData = context.request_payload
     emails = loads(emailData['data'])
     userId = emailData['userId']
-    print(f"Received {len(emails)} emails to process for userId: {userId}")
-    print(emails)
     async def _step1() -> None:
+        if (len(emails) == 0):
+            return
+        
         email_batches = chunk_list(emails, 10)
     
         for index, batch in enumerate(email_batches):
             print(f"Executing batch {index + 1}/{len(email_batches)}...")
         
-            batch_tasks = [lambda e=e: processEmails(e) for e in batch]
-            batch_results = await context.run_parallel(batch_tasks)
+            batch_tasks = [processEmails(e) for e in enumerate(batch)]
+            batch_results = await asyncio.gather(*batch_tasks)
             results.extend(batch_results)
         
             if index < len(email_batches) - 1:
