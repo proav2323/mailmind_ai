@@ -80,7 +80,7 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
         for index, batch in enumerate(email_batches):
             print(f"Executing batch {index + 1}/{len(email_batches)}...")
         
-            batch_tasks = [processEmails(e) for e in batch]
+            batch_tasks = [lambda e=e: processEmails(e) for e in batch]
             batch_results = await context.run_parallel(*batch_tasks)
             results.extend(batch_results)
         
