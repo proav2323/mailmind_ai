@@ -74,26 +74,27 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
     emailData = context.request_payload
     emails = loads(emailData['data'])
     userId = emailData['userId']
-    async def _step1() -> list:
-        if (len(emails) == 0):
-            return []
-        
-        email_batches = chunk_list(emails, 10)
     
-        for index, batch in enumerate(email_batches):
-            print(f"Executing batch {index + 1}/{len(email_batches)}...")
+    async def _step1() -> list:
+        # if (len(emails) == 0):
+        #     return []
         
-            batch_tasks = [processEmails(e) for e in enumerate(batch)]
-            batch_results = await asyncio.gather(*batch_tasks)
-            results.extend(batch_results)
+        # # email_batches = chunk_list(emails, 10)
+    
+        # # for index, batch in enumerate(email_batches):
+        # #     print(f"Executing batch {index + 1}/{len(email_batches)}...")
         
-            if index < len(email_batches) - 1:
-                print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
-                await context.sleep(65)
+        # #     batch_tasks = [processEmails(e) for e in enumerate(batch)]
+        # #     batch_results = await asyncio.gather(*batch_tasks)
+        # #     results.extend(batch_results)
+        
+        # #     if index < len(email_batches) - 1:
+        # #         print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
+        # #         await context.sleep(65)
         return results
 
     await context.run("step-1", _step1)
-    
+
     print("Step 2: Processing results... and calling backend API to store results in database")
     response = await context.call("store-data", url=f"{os.getenv('BACKEND_API_URL')}/emails/store", method="POST", body={"data": results, "emails": emails, "userId": userId}, headers={"Content-Type": "application/json"})
 
