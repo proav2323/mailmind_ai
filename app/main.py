@@ -96,6 +96,6 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
 
     async def _step2() -> None:
         print("Step 2: Processing results... and calling backend API to store results in database")
-        response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": results, "emails": emails, "userId": userId})
+        response = context.call(url=f"{os.getenv('BACKEND_API_URL')}/emails/store", method="POST", body={"data": results, "emails": emails, "userId": userId}, headers={"Content-Type": "application/json"})
 
     await context.run("step-2", _step2)
