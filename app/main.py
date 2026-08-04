@@ -73,6 +73,8 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
     emailData = context.request_payload
     emails = loads(emailData['data'])
     userId = emailData['userId']
+    print(f"Received {len(emails)} emails to process for userId: {userId}")
+    print(emails)
     async def _step1() -> None:
         email_batches = chunk_list(emails, 10)
     
