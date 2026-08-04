@@ -61,7 +61,8 @@ async def my_workflow_failure_handler(
     fail_status: int,
     fail_response: str, 
     fail_headers: dict
-):
+): 
+    print(context)
     print(f"Workflow {context.workflow_run_id} failed with status {fail_status}, {fail_response}. Headers: {fail_headers}")
 
 @serve.post("/email", receiver=Receiver(
@@ -75,7 +76,7 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
     userId = emailData['userId']
     async def _step1() -> list:
         if (len(emails) == 0):
-            return [];
+            return []
         
         email_batches = chunk_list(emails, 10)
     
