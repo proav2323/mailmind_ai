@@ -43,6 +43,7 @@ def chunk_list(lst, size):
 
 class emailItem(BaseModel):
     data: str
+    userId: str
 
 async def processEmails(email):
     try:
@@ -64,6 +65,7 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
     results = []
     emailData = context.request_payload
     emails = loads(emailData.data)
+    userId = emailData.userId
     async def _step1() -> None:
         email_batches = chunk_list(emails, 10)
     
@@ -83,7 +85,7 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
     async def _step2() -> None:
         print("Step 2: Processing results... and calling backend API to store results in database")
         try:
-           response = requests.post(f"{os.getenv('BACKEND_API_URL')}/storeEmails", json={"data": results, "emails": emails})
+           response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": results, "emails": emails, "userId": userId})
            if (response.status_code == 200):
                print("Results successfully stored in the database.")
            else:
