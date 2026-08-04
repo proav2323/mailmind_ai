@@ -1,4 +1,3 @@
-import asyncio
 import os
 from fastapi import FastAPI, HTTPException, status
 import app.utils.ai as ai # production
@@ -82,12 +81,12 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
             print(f"Executing batch {index + 1}/{len(email_batches)}...")
         
             batch_tasks = [processEmails(e) for e in batch]
-            batch_results = await asyncio.gather(*batch_tasks)
+            batch_results = await context.run_parallel(*batch_tasks)
             results.extend(batch_results)
         
             if index < len(email_batches) - 1:
                 print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
-                await asyncio.sleep(65)
+                await context.sleep(65)
 
     await context.run("step-1", _step1)
 
