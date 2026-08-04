@@ -63,8 +63,8 @@ def root():
 async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
     results = []
     emailData = context.request_payload
+    emails = loads(emailData.data)
     async def _step1() -> None:
-        emails = loads(emailData.data)
         email_batches = chunk_list(emails, 10)
     
         for index, batch in enumerate(email_batches):
@@ -83,7 +83,7 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
     async def _step2() -> None:
         print("Step 2: Processing results... and calling backend API to store results in database")
         try:
-           response = requests.post(f"{os.getenv('BACKEND_API_URL')}/storeEmails", json={"data": results})
+           response = requests.post(f"{os.getenv('BACKEND_API_URL')}/storeEmails", json={"data": results, "emails": emails})
            if (response.status_code == 200):
                print("Results successfully stored in the database.")
            else:
