@@ -73,9 +73,9 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
     emailData = context.request_payload
     emails = loads(emailData['data'])
     userId = emailData['userId']
-    async def _step1() -> None:
+    async def _step1() -> list:
         if (len(emails) == 0):
-            return
+            return [];
         
         email_batches = chunk_list(emails, 10)
     
@@ -89,6 +89,7 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
             if index < len(email_batches) - 1:
                 print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
                 await context.sleep(65)
+        return results
 
     await context.run("step-1", _step1)
 
