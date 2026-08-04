@@ -57,7 +57,7 @@ def root():
 
 async def my_workflow_failure_handler(
     context: AsyncWorkflowContext, 
-    fail_status: int, 
+    fail_status: int,
     fail_response: str, 
     fail_headers: dict
 ):
@@ -81,7 +81,7 @@ async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
             print(f"Executing batch {index + 1}/{len(email_batches)}...")
         
             batch_tasks = [lambda e=e: processEmails(e) for e in batch]
-            batch_results = await context.run_parallel(*batch_tasks)
+            batch_results = await context.run_parallel(batch_tasks)
             results.extend(batch_results)
         
             if index < len(email_batches) - 1:
