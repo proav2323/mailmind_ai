@@ -61,10 +61,18 @@ async def processEmails(email):
 def root():
     return "hello world"
 
+async def my_workflow_failure_handler(
+    context: AsyncWorkflowContext, 
+    fail_status: int, 
+    fail_response: str, 
+    fail_headers: dict
+):
+    print(f"Workflow {context.workflow_run_id} failed with status {fail_status}, {fail_response}. Headers: {fail_headers}")
+
 @serve.post("/email", receiver=Receiver(
         current_signing_key=os.environ["QSTASH_CURRENT_SIGNING_KEY"],
         next_signing_key=os.environ["QSTASH_NEXT_SIGNING_KEY"],
-    ))
+    ), failure_function=my_workflow_failure_handler)
 async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
     results = []
     emailData = context.request_payload
