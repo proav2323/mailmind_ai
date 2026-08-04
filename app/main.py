@@ -68,8 +68,8 @@ def root():
 async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
     results = []
     emailData = context.request_payload
-    emails = loads(emailData.data)
-    userId = emailData.userId
+    emails = loads(emailData['data'])
+    userId = emailData['userId']
     async def _step1() -> None:
         email_batches = chunk_list(emails, 10)
     
