@@ -44,6 +44,6 @@ def root():
 @app.post("/email")
 async def emailProcess(emailItem: emailItem):
      print("working")
-     response = requests.post(f"https://mailmind-ai-rho.vercel.app/api/workflows", headers={"Content-Type": "application/json"}, json={"workflow": "emailWorkflow", "inputs": {"data": emailItem.data, "userId": emailItem.userId}})
+     response = requests.post(url=f"https://mailmind-ai-rho.vercel.app/api/workflows", headers={"Content-Type": "application/json"}, json={"workflow": "emailWorkflow", "inputs": {"data": emailItem.data, "userId": emailItem.userId}})
      print(response.status_code)
      return "done"
