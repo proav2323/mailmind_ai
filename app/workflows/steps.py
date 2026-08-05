@@ -30,6 +30,8 @@ async def workflow(*, data: emailItem):
     emailData = data
     emails = loads(emailData.data)
     userId = emailData.userId
+    print(emails)
+    print(userId)
     if (len(emails) == 0):
         print("no emails")
         results = []
