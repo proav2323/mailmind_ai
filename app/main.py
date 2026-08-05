@@ -5,15 +5,12 @@ import app.utils.ai as ai # production
 # import utils.ai as ai  # developemtn only
 from pydantic import BaseModel
 from json import loads
-from upstash_workflow.fastapi import Serve
-from upstash_workflow import AsyncWorkflowContext
 from dotenv import load_dotenv
 import requests
-from qstash import Receiver
+from app.workflows.steps import wf 
 
 load_dotenv()
 app = FastAPI()
-serve = Serve(app)
 
 #  prompt-6-things
 #  1) role - role of agent (ex-1-you are a engineer responsible for reviewing code)(good) (ex-2-you are a genius enginner(bad)(should be genius))
@@ -56,46 +53,12 @@ async def processEmails(email):
 def root():
     return "hello world"
 
-async def my_workflow_failure_handler(
-    context: AsyncWorkflowContext, 
-    fail_status: int,
-    fail_response: str, 
-    fail_headers: dict
-): 
-    print(context)
-    print(f"Workflow {context.workflow_run_id} failed with status {fail_status}, {fail_response}. Headers: {fail_headers}")
 
-@serve.post("/email", receiver=Receiver(
-        current_signing_key=os.environ["QSTASH_CURRENT_SIGNING_KEY"],
-        next_signing_key=os.environ["QSTASH_NEXT_SIGNING_KEY"],
-    ), failure_function=my_workflow_failure_handler)
-async def workflow(context: AsyncWorkflowContext[emailItem]) -> None:
-    results = []
-    emailData = context.request_payload
-    emails = loads(emailData['data'])
-    userId = emailData['userId']
-    
-    async def _step1() -> list:
-        # if (len(emails) == 0):
-        #     return []
-        
-        # # email_batches = chunk_list(emails, 10)
-    
-        # # for index, batch in enumerate(email_batches):
-        # #     print(f"Executing batch {index + 1}/{len(email_batches)}...")
-        
-        # #     batch_tasks = [processEmails(e) for e in enumerate(batch)]
-        # #     batch_results = await asyncio.gather(*batch_tasks)
-        # #     results.extend(batch_results)
-        
-        # #     if index < len(email_batches) - 1:
-        # #         print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
-        # #         await context.sleep(65)
-        return results
 
-    await context.run("step-1", _step1)
 
-    print("Step 2: Processing results... and calling backend API to store results in database")
-    response = await context.call("store-data", url=f"{os.getenv('BACKEND_API_URL')}/emails/store", method="POST", body={"data": results, "emails": emails, "userId": userId}, headers={"Content-Type": "application/json"})
 
-    return response.body
+@app.post("/email")
+async def workflow(emailItem: emailItem) -> None:
+     exc = await wf.trigger("workflow", emailItem)
+     print(exc.id)
+     return exc.id
