@@ -6,7 +6,7 @@ import app.utils.ai as ai
 import asyncio
 import requests
 import os
-from upstash_workflow import Client, AsyncWorkflowContext
+from upstash_workflow import AsyncWorkflowContext
 from upstash_workflow.fastapi import Serve
 
 load_dotenv()
