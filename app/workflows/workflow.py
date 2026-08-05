@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from app.workflow import wf
 
 
-load_dotenv()
+load_dotenv()   
 
 class emailItem(BaseModel):
     data: str
