@@ -1,3 +1,3 @@
-from app.workflows.steps import wf, ai_content_pipeline
+from app.workflows.steps import wf, workflow
 
 __all__ = ["wf", "workflow"]
