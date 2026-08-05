@@ -11,7 +11,6 @@ from upstash_workflow.fastapi import Serve
 
 load_dotenv()
 app = FastAPI()
-serve = Serve(app)
 
 
 #  prompt-6-things
@@ -83,8 +82,13 @@ async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
     response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": results, "emails": emails, "userId": userId}, headers={"Content-Type": "application/json"})
     print(f"done {response.status_code}")
 
+async def my_failure_handler(context: AsyncWorkflowContext, error: str) -> None:
+    print(f"Workflow {context.workflow_run_id} failed!")
+    print(f"Error details: {error}")
 
-@serve.post("/email")
+serve = Serve(app,failure_function=my_failure_handler)
+
+@serve.post("/email",)
 async def emailWorkflow(context: AsyncWorkflowContext):
 
     payload = context.request_payload
