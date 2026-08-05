@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from app.workflow import wf
+from app.workflows.workflow import workflow
 
 load_dotenv()
 app = FastAPI()
@@ -44,6 +45,6 @@ def root():
 @app.post("/email")
 async def emailProcess(emailItem: emailItem):
      print("working")
-     exc = await wf.trigger("workflow", emailItem)
+     exc = await workflow(data=emailItem)
      print(exc.id)
      return exc.id
