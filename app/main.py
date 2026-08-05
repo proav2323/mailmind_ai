@@ -1,13 +1,7 @@
-import asyncio
-import os
 from fastapi import FastAPI, HTTPException, status
-import app.utils.ai as ai # production
-# import utils.ai as ai  # developemtn only
 from pydantic import BaseModel
-from json import loads
 from dotenv import load_dotenv
-import requests
-from app.workflows.steps import wf 
+from app.workflows.steps import wf
 
 load_dotenv()
 app = FastAPI()
@@ -36,26 +30,16 @@ app = FastAPI()
 # 4) get subject -> done
 # 5) get priority -> done
 
-def chunk_list(lst, size):
-    return [lst[i:i + size] for i in range(0, len(lst), size)]
+
 
 class emailItem(BaseModel):
     data: str
     userId: str
 
-async def processEmails(email):
-        data = await ai.getAiEmailResponse(email['body'], email['categories'])
-        returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority,     "importance": data.importance, "urgency": data.urgency,"senderImportance": data.senderImportance,
-    "requireAction": data.requireAction, "tags": data.tags}
-        return returnData
 
 @app.get("/")
 def root():
     return "hello world"
-
-
-
-
 
 @app.post("/email")
 async def workflow(emailItem: emailItem) -> None:

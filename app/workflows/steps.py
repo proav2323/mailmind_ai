@@ -1,14 +1,28 @@
 import asyncio
 from vercel import workflow
-from app.main import emailItem, chunk_list, processEmails
 from json import loads
 import requests
 import os
 from dotenv import load_dotenv;
+import app.utils.ai as ai # production
+from pydantic import BaseModel
+
 
 load_dotenv()
 wf = workflow.Workflows()
 
+class emailItem(BaseModel):
+    data: str
+    userId: str
+
+def chunk_list(lst, size):
+    return [lst[i:i + size] for i in range(0, len(lst), size)]
+
+async def processEmails(email):
+        data = await ai.getAiEmailResponse(email['body'], email['categories'])
+        returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority,     "importance": data.importance, "urgency": data.urgency,"senderImportance": data.senderImportance,
+    "requireAction": data.requireAction, "tags": data.tags}
+        return returnData
 
 @wf.workflow
 async def workflow(*, data: emailItem):
