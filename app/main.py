@@ -45,6 +45,6 @@ def root():
 @app.post("/email")
 async def emailProcess(emailItem: emailItem):
      print("working")
-     exc = await workflow(data=emailItem)
-     print(exc.id)
-     return exc.id
+     await workflow(data=emailItem)
+     print("done")
+     return "done"
