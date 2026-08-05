@@ -1,11 +1,27 @@
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from app.workflow import wf
-import app.workflows.emailWorkflow
+from json import loads
+import app.utils.ai as ai
+import asyncio
+import requests
+import os
+import inngest
+import inngest.fast_api
+import logging
 
 load_dotenv()
 app = FastAPI()
+
+inngest_client = inngest.Inngest(
+    app_id="my_fastapi_app",
+    logger=logging.getLogger("uvicorn"),
+)
+
+@inngest_client.create_function(
+    fn_id="email_process",
+    trigger=inngest.TriggerEvent(event="app/emailprocessing"),
+)
 
 #  prompt-6-things
 #  1) role - role of agent (ex-1-you are a engineer responsible for reviewing code)(good) (ex-2-you are a genius enginner(bad)(should be genius))
@@ -38,6 +54,46 @@ class emailItem(BaseModel):
     userId: str
 
 
+load_dotenv()   
+def chunk_list(lst, size):
+    return [lst[i:i + size] for i in range(0, len(lst), size)]
+
+async def processEmails(email):
+        data = await ai.getAiEmailResponse(email['body'], email['categories'])
+        returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority,     "importance": data.importance, "urgency": data.urgency,"senderImportance": data.senderImportance,
+    "requireAction": data.requireAction, "tags": data.tags}
+        return returnData
+
+async def emailWorkflow(ctx: inngest.Context):
+    data = ctx.event.data.get("data", "User")
+    userId = ctx.event.data.get("userId", "User")
+    results = []
+    emails = loads(data)
+    print(emails)
+    print(userId)
+    if (len(emails) == 0):
+        print("no emails")
+        results = []
+    else:             
+       email_batches = chunk_list(emails, 10)
+        
+       for index, batch in enumerate(email_batches):
+           print(f"Executing batch {index + 1}/{len(email_batches)}...")
+            
+           batch_tasks = [processEmails(e) for e in enumerate(batch)]
+           batch_results = await asyncio.gather(*batch_tasks)
+           results.extend(batch_results)
+            
+           if index < len(email_batches) - 1:
+               print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
+               await asyncio.sleep(65)
+
+    print("Step 2: Processing results... and calling backend API to store results in database")
+    response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": results, "emails": emails, "userId": userId}, headers={"Content-Type": "application/json"})
+    print(f"done {response.status_code}")
+
+inngest.fast_api.serve(app, inngest_client, [emailWorkflow])
+
 @app.get("/")
 def root():
     return "hello world"
@@ -45,6 +101,10 @@ def root():
 @app.post("/email")
 async def emailProcess(emailItem: emailItem):
      print("working")
-     exc = await wf['emailWorkflow'].trigger(data=emailItem)
-     print(exc.id)
+     await inngest_client.send(
+        inngest.Event(
+            name="app/emailprocessing",
+            data={"data": emailItem.data, "userId": emailItem.userId}
+        )
+    )
      return "done"
