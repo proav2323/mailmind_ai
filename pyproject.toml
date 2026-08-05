@@ -55,6 +55,9 @@ dependencies = ["vercel", "aiolimiter==1.2.1",
 "vercel-sandbox==0.3.0",
 "websockets==16.1.1"
 ]
- 
+
+[tool.vercel]
+entrypoint = "app.main:app" 
+
 [[tool.vercel.workflows]]
 entrypoint = "app.workflows:wf"
