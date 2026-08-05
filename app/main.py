@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import requests
+from app.workflow import wf
 
 load_dotenv()
 app = FastAPI()
@@ -44,6 +45,6 @@ def root():
 @app.post("/email")
 async def emailProcess(emailItem: emailItem):
      print("working")
-     response = requests.post(url=f"https://mailmind-ai-rho.vercel.app/api/workflows", headers={"Content-Type": "application/json"}, json={"workflow": "emailWorkflow", "inputs": {"data": emailItem.data, "userId": emailItem.userId}})
-     print(response.status_code)
+     exc = await wf.emailWorkflow.trigger(data=emailItem)
+     print(exc.id)
      return "done"
