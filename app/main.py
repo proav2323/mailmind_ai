@@ -43,6 +43,7 @@ def root():
 
 @app.post("/email")
 async def workflow(emailItem: emailItem):
+     print("working")
      exc = await wf.trigger("workflow", emailItem)
      print(exc.id)
      return exc.id
