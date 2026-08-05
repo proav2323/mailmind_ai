@@ -25,7 +25,7 @@ async def processEmails(email):
         return returnData
 
 @wf.workflow
-async def workflow(*, data: emailItem):
+async def emailWorkflow(*, data: emailItem):
     results = []
     emailData = data
     emails = loads(emailData.data)

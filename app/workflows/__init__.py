@@ -1,4 +1,4 @@
-from app.workflows.workflow import workflow
+from app.workflows.emailWorkflow import emailWorkflow
 from app.workflow import wf
 
-__all__ = ["wf", "workflow"]
+__all__ = ["wf", "emailWorkflow"]
