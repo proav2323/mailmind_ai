@@ -12,7 +12,6 @@ from upstash_workflow.fastapi import Serve
 load_dotenv()
 app = FastAPI()
 serve = Serve(app)
-client = Client(token=os.getenv("QSTASH_TOKEN"))
 
 
 #  prompt-6-things
