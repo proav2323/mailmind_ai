@@ -85,22 +85,19 @@ async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
     print(f"done {response.status_code}")
 
 
-@serve.post("/emailworkflow")
+@serve.post("/email")
 async def emailWorkflow(context: AsyncWorkflowContext):
-    payload = context.request_payload
 
+    payload = context.request_payload
+    print(payload)
+    
     async def _step1():
         await emailWorkflowRun(data=payload, context=context)
 
     await context.run("step-1", _step1)
+    print("done")
 
 @app.get("/")
 def root():
     return "hello world"
 
-@app.post("/email")
-async def emailProcess(emailItem: emailItem):
-     print("working")
-     exc = await client.trigger(url="mailmind-ai-rho.vercel.app/emailworkflow", body=emailItem)
-     print(exc.workflow_run_id)
-     return "done"
