@@ -86,9 +86,9 @@ async def my_failure_handler(context: AsyncWorkflowContext, error: str) -> None:
     print(f"Workflow {context.workflow_run_id} failed!")
     print(f"Error details: {error}")
 
-serve = Serve(app,failure_function=my_failure_handler)
+serve = Serve(app)
 
-@serve.post("/email",)
+@serve.post("/email",failure_function=my_failure_handler)
 async def emailWorkflow(context: AsyncWorkflowContext):
 
     payload = context.request_payload
