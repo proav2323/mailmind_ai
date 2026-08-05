@@ -56,8 +56,8 @@ async def processEmails(email):
         return returnData
 
 async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
-    data = data.data
-    userId = data.userId
+    data = data['data']
+    userId = data['userId']
     results = []
     emails = loads(data)
     print(emails)
