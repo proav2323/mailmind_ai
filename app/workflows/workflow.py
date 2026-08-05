@@ -6,10 +6,10 @@ import os
 from dotenv import load_dotenv;
 import app.utils.ai as ai # production
 from pydantic import BaseModel
+from app.workflow import wf
 
 
 load_dotenv()
-wf = workflow.Workflows()
 
 class emailItem(BaseModel):
     data: str

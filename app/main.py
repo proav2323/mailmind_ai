@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from app.workflows.steps import wf
+from app.workflow import wf
 
 load_dotenv()
 app = FastAPI()
