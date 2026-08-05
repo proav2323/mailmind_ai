@@ -52,3 +52,4 @@ async def emailWorkflow(*, data: emailItem):
     print("Step 2: Processing results... and calling backend API to store results in database")
     response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": results, "emails": emails, "userId": userId}, headers={"Content-Type": "application/json"})
     print(f"done {response.status_code}")
+    pass
