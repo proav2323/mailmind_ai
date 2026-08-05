@@ -82,9 +82,12 @@ async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
     response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": results, "emails": emails, "userId": userId}, headers={"Content-Type": "application/json"})
     print(f"done {response.status_code}")
 
-async def my_failure_handler(context: AsyncWorkflowContext, error: str) -> None:
-    print(f"Workflow {context.workflow_run_id} failed!")
-    print(f"Error details: {error}")
+async def my_failure_handler(context, fail_status, fail_response, fail_headers) -> None:
+    print(f"Workflow {context.workflow_run_id} failed permanently!")
+    print(f"Status Code: {fail_status}")
+    print(f"Error Details: {fail_response}")
+
+    return "Handled failure successfully"
 
 serve = Serve(app)
 
