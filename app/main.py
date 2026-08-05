@@ -6,22 +6,14 @@ import app.utils.ai as ai
 import asyncio
 import requests
 import os
-import inngest
-import inngest.fast_api
-import logging
+from upstash_workflow import Client, AsyncWorkflowContext
+from upstash_workflow.fastapi import Serve
 
 load_dotenv()
 app = FastAPI()
+serve = Serve(app)
+client = Client(token=os.getenv("QSTASH_TOKEN"))
 
-inngest_client = inngest.Inngest(
-    app_id="my_fastapi_app",
-    logger=logging.getLogger("uvicorn"),
-)
-
-@inngest_client.create_function(
-    fn_id="email_process",
-    trigger=inngest.TriggerEvent(event="app/emailprocessing"),
-)
 
 #  prompt-6-things
 #  1) role - role of agent (ex-1-you are a engineer responsible for reviewing code)(good) (ex-2-you are a genius enginner(bad)(should be genius))
@@ -64,9 +56,9 @@ async def processEmails(email):
     "requireAction": data.requireAction, "tags": data.tags}
         return returnData
 
-async def emailWorkflow(ctx: inngest.Context):
-    data = ctx.event.data.get("data", "User")
-    userId = ctx.event.data.get("userId", "User")
+async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
+    data = data.data
+    userId = data.userId
     results = []
     emails = loads(data)
     print(emails)
@@ -86,13 +78,21 @@ async def emailWorkflow(ctx: inngest.Context):
             
            if index < len(email_batches) - 1:
                print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
-               await asyncio.sleep(65)
+               await context.sleep(65)
 
     print("Step 2: Processing results... and calling backend API to store results in database")
     response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": results, "emails": emails, "userId": userId}, headers={"Content-Type": "application/json"})
     print(f"done {response.status_code}")
 
-inngest.fast_api.serve(app, inngest_client, [emailWorkflow])
+
+@serve.post("/emailworkflow")
+async def emailWorkflow(context: AsyncWorkflowContext):
+    payload = context.request_payload
+
+    async def _step1():
+        await emailWorkflowRun(data=payload, context=context)
+
+    await context.run("step-1", _step1)
 
 @app.get("/")
 def root():
@@ -101,10 +101,6 @@ def root():
 @app.post("/email")
 async def emailProcess(emailItem: emailItem):
      print("working")
-     await inngest_client.send(
-        inngest.Event(
-            name="app/emailprocessing",
-            data={"data": emailItem.data, "userId": emailItem.userId}
-        )
-    )
+     exc = await client.trigger(url="mailmind-ai-rho.vercel.app/emailworkflow", body=emailItem)
+     print(exc.workflow_run_id)
      return "done"
