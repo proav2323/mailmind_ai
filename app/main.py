@@ -42,7 +42,7 @@ def root():
     return "hello world"
 
 @app.post("/email")
-async def workflow(emailItem: emailItem) -> None:
+async def workflow(emailItem: emailItem):
      exc = await wf.trigger("workflow", emailItem)
      print(exc.id)
      return exc.id
