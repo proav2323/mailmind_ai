@@ -6,8 +6,6 @@ import app.utils.ai as ai
 import asyncio
 import requests
 import os
-from upstash_workflow import AsyncWorkflowContext
-from upstash_workflow.fastapi import Serve
 from upstash_redis import Redis
 import logging
 
@@ -94,19 +92,6 @@ async def my_failure_handler(context, fail_status, fail_response, fail_headers) 
     print(f"Error Details: {fail_response}")
 
     return "Handled failure successfully"
-
-serve = Serve(app)
-
-# @serve.post("/email",failure_function=my_failure_handler)
-# async def emailWorkflow(context: AsyncWorkflowContext):
-
-#     payload = context.request_payload
-    
-#     async def _step1():
-#         await emailWorkflowRun(data=payload, context=context)
-
-#     await context.run("step-1", _step1)
-#     print("done")
 
 @app.post("/email")
 async def email(email: emailItem, background_task: BackgroundTasks):
