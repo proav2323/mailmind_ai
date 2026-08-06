@@ -9,10 +9,13 @@ import os
 from upstash_workflow import AsyncWorkflowContext
 from upstash_workflow.fastapi import Serve
 from upstash_redis import Redis
+import logging
 
 load_dotenv()
 app = FastAPI()
 redis = Redis.from_env()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 #  prompt-6-things
@@ -57,6 +60,7 @@ async def processEmails(email):
         return returnData
 
 async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
+    logger.info(f"Task STARTED")
     emailData = redis.get(data['data'])
     userId = data['userId']
     results = []
@@ -82,6 +86,7 @@ async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
     redis.set(f"{userId}-aiEmails", dumps(results), ex=3600)
     response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": f"{userId}-aiEmails", "emails": f"{userId}-emails", "userId": userId}, headers={"Content-Type": "application/json"})
     print(f"done {response.status_code}")
+    logger.info(f"Task complted")
 
 async def my_failure_handler(context, fail_status, fail_response, fail_headers) -> None:
     print(f"Workflow {context.workflow_run_id} failed permanently!")
