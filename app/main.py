@@ -116,7 +116,7 @@ async def emailWorkflow(context: AsyncWorkflowContext):
         
         if index < len(email_batches) - 1:
             print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
-            await context.sleep(f"quota-sleep-after-batch-{index + 1}", duration=65)
+            await context.sleep(f"quota-sleep-after-batch-{index + 1}", "65s")
 
     print("Step 2: Processing results... and calling backend API to store results in database")
     await context.run("save-to-backend", lambda: save_results_to_backend(userId, results))
