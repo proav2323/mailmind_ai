@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from json import loads
+from json import loads, dumps
 import app.utils.ai as ai
 import asyncio
 import requests
@@ -82,7 +82,7 @@ async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
                await context.sleep(65)
 
     print("Step 2: Processing results... and calling backend API to store results in database")
-    redis.set(f"{userId}-aiEmails", str(results), ex=3600)
+    redis.set(f"{userId}-aiEmails", dumps(results), ex=3600)
     response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": f"{userId}-aiEmails", "emails": f"{userId}-emails", "userId": userId}, headers={"Content-Type": "application/json"})
     print(f"done {response.status_code}")
 
