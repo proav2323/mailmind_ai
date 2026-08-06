@@ -61,8 +61,8 @@ async def processEmails(email):
 
 async def emailWorkflowRun(data: emailItem):
     logger.info(f"Task STARTED")
-    emailData = redis.get(data['data'])
-    userId = data['userId']
+    emailData = redis.get(data.data)
+    userId = data.userId
     results = []
     emails = loads(emailData)
     if (len(emails) == 0):
