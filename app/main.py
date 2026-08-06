@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, BackgroundTasks
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from json import loads, dumps
@@ -51,7 +51,6 @@ def chunk_list(lst, size):
     return [lst[i:i + size] for i in range(0, len(lst), size)]
 
 async def processEmails(email):
-        print(email)
         data = await ai.getAiEmailResponse(email['body'], email['categories'])
         returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority,     "importance": data.importance, "urgency": data.urgency,"senderImportance": data.senderImportance,
     "requireAction": data.requireAction, "tags": data.tags}
@@ -62,8 +61,6 @@ async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
     userId = data['userId']
     results = []
     emails = loads(emailData)
-    print(emails)
-    print(userId)
     if (len(emails) == 0):
         print("no emails")
         results = []
@@ -95,16 +92,20 @@ async def my_failure_handler(context, fail_status, fail_response, fail_headers) 
 
 serve = Serve(app)
 
-@serve.post("/email",failure_function=my_failure_handler)
-async def emailWorkflow(context: AsyncWorkflowContext):
+# @serve.post("/email",failure_function=my_failure_handler)
+# async def emailWorkflow(context: AsyncWorkflowContext):
 
-    payload = context.request_payload
-    print(payload)
+#     payload = context.request_payload
     
-    async def _step1():
-        await emailWorkflowRun(data=payload, context=context)
+#     async def _step1():
+#         await emailWorkflowRun(data=payload, context=context)
 
-    await context.run("step-1", _step1)
+#     await context.run("step-1", _step1)
+#     print("done")
+
+@app.post("/email")
+async def email(email: emailItem, background_task: BackgroundTasks):
+    background_task.add_task(emailWorkflowRun, email)
     print("done")
 
 @app.get("/")
