@@ -51,6 +51,7 @@ def chunk_list(lst, size):
     return [lst[i:i + size] for i in range(0, len(lst), size)]
 
 async def processEmails(email):
+        print(email)
         data = await ai.getAiEmailResponse(email['body'], email['categories'])
         returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority,     "importance": data.importance, "urgency": data.urgency,"senderImportance": data.senderImportance,
     "requireAction": data.requireAction, "tags": data.tags}
