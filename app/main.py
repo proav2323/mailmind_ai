@@ -51,38 +51,40 @@ def chunk_list(lst, size):
     return [lst[i:i + size] for i in range(0, len(lst), size)]
 
 async def processEmails(email):
-    data = await ai.getAiEmailResponse(email['body'], email['categories'])
-    return {
-        "category": data.category, 
-        "id": email['myGivenId'], 
-        "summary": data.summary, 
-        "deadline": data.deadline, 
-        "subject": data.subject, 
-        "priority": data.priority,     
-        "importance": data.importance, 
-        "urgency": data.urgency,
-        "senderImportance": data.senderImportance,
-        "requireAction": data.requireAction, 
-        "tags": data.tags
-    }
+        print(email)
+        data = await ai.getAiEmailResponse(email['body'], email['categories'])
+        returnData = {"category": data.category, "id":  email['myGivenId'], "summary": data.summary, "deadline": data.deadline, "subject": data.subject, "priority": data.priority,     "importance": data.importance, "urgency": data.urgency,"senderImportance": data.senderImportance,
+    "requireAction": data.requireAction, "tags": data.tags}
+        return returnData
 
-# This is a standard async function that acts as a step execution helper
-async def process_batch_step(batch):
-    batch_results = []
-    for e in batch:
-        result = await processEmails(e)
-        batch_results.append(result)
-    return batch_results
+async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
+    emailData = redis.get(data['data'])
+    userId = data['userId']
+    results = []
+    emails = loads(emailData)
+    print(emails)
+    print(userId)
+    if (len(emails) == 0):
+        print("no emails")
+        results = []
+    else:             
+       email_batches = chunk_list(emails, 10)
+        
+       for index, batch in enumerate(email_batches):
+           print(f"Executing batch {index + 1}/{len(email_batches)}...")
+            
+           batch_tasks = [processEmails(e) for i, e in enumerate(batch)]
+           batch_results = await asyncio.gather(*batch_tasks)
+           results.extend(batch_results)
+            
+           if index < len(email_batches) - 1:
+               print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
+               await context.sleep(65)
 
-def save_results_to_backend(userId, results):
+    print("Step 2: Processing results... and calling backend API to store results in database")
     redis.set(f"{userId}-aiEmails", dumps(results), ex=3600)
-    response = requests.post(
-        f"{os.getenv('BACKEND_API_URL')}/emails/store", 
-        json={"data": f"{userId}-aiEmails", "emails": f"{userId}-emails", "userId": userId}, 
-        headers={"Content-Type": "application/json"}
-    )
+    response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": f"{userId}-aiEmails", "emails": f"{userId}-emails", "userId": userId}, headers={"Content-Type": "application/json"})
     print(f"done {response.status_code}")
-    return response.status_code
 
 async def my_failure_handler(context, fail_status, fail_response, fail_headers) -> None:
     print(f"Workflow {context.workflow_run_id} failed permanently!")
@@ -95,32 +97,16 @@ serve = Serve(app)
 
 @serve.post("/email",failure_function=my_failure_handler)
 async def emailWorkflow(context: AsyncWorkflowContext):
+
     payload = context.request_payload
-    userId = payload['userId']
-    emailData = redis.get(payload['data'])
-    emails = loads(emailData) if emailData else []
+    print(payload)
+    
+    async def _step1():
+        await emailWorkflowRun(data=payload, context=context)
 
-    results = []
-    email_batches = chunk_list(emails, 10)
-    current_index = 0
-    if len(emails) != 0:
-        while current_index < len(email_batches):
-            print(f"Executing batch {current_index + 1}/{len(email_batches)}...")
-        
-            batch_output = await context.run(f"process-batch-{current_index + 1}", lambda: process_batch_step(batch=email_batches[current_index]))
-            results.extend(batch_output)
-        
-            if current_index < len(email_batches) - 1:
-                print(f"Batch {current_index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
-                await context.sleep(f"quota-sleep-after-batch-{current_index + 1}", "65s")
-    else:
-        print("no-emails")
-        results = []
-
-    print("Step 2: Processing results... and calling backend API to store results in database")
-    await context.run("save-to-backend", lambda: save_results_to_backend(userId, results))
+    await context.run("step-1", _step1)
+    print("done")
 
 @app.get("/")
 def root():
     return "hello world"
-
