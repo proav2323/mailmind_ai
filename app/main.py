@@ -62,8 +62,6 @@ async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
     userId = data['userId']
     results = []
     emails = loads(emailData)
-    print(emails)
-    print(userId)
     if (len(emails) == 0):
         print("no emails")
         results = []
@@ -99,13 +97,11 @@ serve = Serve(app)
 async def emailWorkflow(context: AsyncWorkflowContext):
 
     payload = context.request_payload
-    print(payload)
     
     async def _step1():
         await emailWorkflowRun(data=payload, context=context)
 
     await context.run("step-1", _step1)
-    print("done")
 
 @app.get("/")
 def root():
