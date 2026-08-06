@@ -8,9 +8,11 @@ import requests
 import os
 from upstash_workflow import AsyncWorkflowContext
 from upstash_workflow.fastapi import Serve
+from upstash_redis import Redis
 
 load_dotenv()
 app = FastAPI()
+redis = Redis.from_env()
 
 
 #  prompt-6-things
@@ -55,7 +57,7 @@ async def processEmails(email):
         return returnData
 
 async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
-    emailData = data['data']
+    emailData = redis.get(data['data'])
     userId = data['userId']
     results = []
     emails = loads(emailData)

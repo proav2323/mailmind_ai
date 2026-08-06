@@ -54,7 +54,8 @@ dependencies = ["vercel", "aiolimiter==1.2.1",
 "vercel-oidc==0.7.1",
 "vercel-queue==0.7.2",
 "vercel-sandbox==0.3.0",
-"websockets==16.1.1"
+"websockets==16.1.1",
+"upstash-redis==1.7.0",
 ]
 
 [tool.vercel]
