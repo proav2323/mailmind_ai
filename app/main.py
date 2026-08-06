@@ -99,23 +99,23 @@ async def emailWorkflow(context: AsyncWorkflowContext):
     userId = payload['userId']
     emailData = redis.get(payload['data'])
     emails = loads(emailData) if emailData else []
-    
-    if len(emails) == 0:
-        print("no emails")
-        return []
 
     results = []
     email_batches = chunk_list(emails, 10)
-    
-    for index, batch in enumerate(email_batches):
-        print(f"Executing batch {index + 1}/{len(email_batches)}...")
+
+    if len(emails) != 0:
+        for index, batch in enumerate(email_batches):
+            print(f"Executing batch {index + 1}/{len(email_batches)}...")
         
-        batch_output = await context.run(f"process-batch-{index + 1}", lambda: process_batch_step(batch=batch))
-        results.extend(batch_output)
+            batch_output = await context.run(f"process-batch-{index + 1}", lambda: process_batch_step(batch=batch))
+            results.extend(batch_output)
         
-        if index < len(email_batches) - 1:
-            print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
-            await context.sleep(f"quota-sleep-after-batch-{index + 1}", "65s")
+            if index < len(email_batches) - 1:
+                print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
+                await context.sleep(f"quota-sleep-after-batch-{index + 1}", "65s")
+    else:
+        print("no-emails")
+        results = []
 
     print("Step 2: Processing results... and calling backend API to store results in database")
     await context.run("save-to-backend", lambda: save_results_to_backend(userId, results))
