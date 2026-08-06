@@ -102,17 +102,17 @@ async def emailWorkflow(context: AsyncWorkflowContext):
 
     results = []
     email_batches = chunk_list(emails, 10)
-
+    current_index = 0
     if len(emails) != 0:
-        for index, batch in enumerate(email_batches):
-            print(f"Executing batch {index + 1}/{len(email_batches)}...")
+        while current_index < len(email_batches):
+            print(f"Executing batch {current_index + 1}/{len(email_batches)}...")
         
-            batch_output = await context.run(f"process-batch-{index + 1}", lambda: process_batch_step(batch=batch))
+            batch_output = await context.run(f"process-batch-{current_index + 1}", lambda: process_batch_step(batch=email_batches[current_index]))
             results.extend(batch_output)
         
-            if index < len(email_batches) - 1:
-                print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
-                await context.sleep(f"quota-sleep-after-batch-{index + 1}", "65s")
+            if current_index < len(email_batches) - 1:
+                print(f"Batch {current_index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
+                await context.sleep(f"quota-sleep-after-batch-{current_index + 1}", "65s")
     else:
         print("no-emails")
         results = []
