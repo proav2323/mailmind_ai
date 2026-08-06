@@ -72,10 +72,10 @@ async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
         
        for index, batch in enumerate(email_batches):
            print(f"Executing batch {index + 1}/{len(email_batches)}...")
-            
-           batch_tasks = [processEmails(e) for i, e in enumerate(batch)]
-           batch_results = await asyncio.gather(*batch_tasks)
-           results.extend(batch_results)
+           
+           for i, e in enumerate(batch):
+               result = await processEmails(e)
+               results.append(result)
             
            if index < len(email_batches) - 1:
                print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
