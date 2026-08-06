@@ -79,7 +79,7 @@ async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
             
            if index < len(email_batches) - 1:
                print(f"Batch {index + 1} done. Sleeping 65 seconds to completely reset Google quota...")
-               await context.sleep(65)
+               await context.sleep("mamximing_google_quota", duration=65)
 
     print("Step 2: Processing results... and calling backend API to store results in database")
     redis.set(f"{userId}-aiEmails", dumps(results), ex=3600)
