@@ -51,7 +51,6 @@ def chunk_list(lst, size):
     return [lst[i:i + size] for i in range(0, len(lst), size)]
 
 async def processEmails(email):
-    print(email)
     data = await ai.getAiEmailResponse(email['body'], email['categories'])
     return {
         "category": data.category, 
@@ -111,7 +110,7 @@ async def emailWorkflow(context: AsyncWorkflowContext):
     for index, batch in enumerate(email_batches):
         print(f"Executing batch {index + 1}/{len(email_batches)}...")
         
-        batch_output = await context.run(f"process-batch-{index + 1}", lambda b=batch: process_batch_step(b))
+        batch_output = await context.run(f"process-batch-{index + 1}", lambda: process_batch_step(batch=batch))
         results.extend(batch_output)
         
         if index < len(email_batches) - 1:
