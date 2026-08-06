@@ -59,7 +59,7 @@ async def processEmails(email):
     "requireAction": data.requireAction, "tags": data.tags}
         return returnData
 
-async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
+async def emailWorkflowRun(data: emailItem):
     logger.info(f"Task STARTED")
     emailData = redis.get(data['data'])
     userId = data['userId']
