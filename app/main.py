@@ -82,7 +82,8 @@ async def emailWorkflowRun(data: emailItem, context: AsyncWorkflowContext):
                await context.sleep(65)
 
     print("Step 2: Processing results... and calling backend API to store results in database")
-    response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": results, "emails": emails, "userId": userId}, headers={"Content-Type": "application/json"})
+    redis.set(f"{userId}-aiEmails", str(results), ex=3600)
+    response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": f"{userId}-aiEmails", "emails": f"{userId}-emails", "userId": userId}, headers={"Content-Type": "application/json"})
     print(f"done {response.status_code}")
 
 async def my_failure_handler(context, fail_status, fail_response, fail_headers) -> None:
