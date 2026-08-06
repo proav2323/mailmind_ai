@@ -1,7 +1,7 @@
 [project]
 name = "MAILMIND-AI"
 version = "0.1.0"
-requires-python = ">=3.12"
+requires-python = ">=3.8"
 dependencies = ["vercel", "aiolimiter==1.2.1",
 "annotated-doc==0.0.4",
 "annotated-types==0.7.0",
