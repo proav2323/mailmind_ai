@@ -8,6 +8,7 @@ import requests
 import os
 from upstash_redis import Redis
 import logging
+from app.worker import process_user_emails
 
 load_dotenv()
 app = FastAPI()
@@ -88,8 +89,9 @@ async def emailWorkflowRun(data: emailItem):
 
 @app.post("/email")
 async def email(email: emailItem, background_task: BackgroundTasks):
-    background_task.add_task(emailWorkflowRun, email)
-    print("done")
+    # background_task.add_task(emailWorkflowRun, email)
+    run = process_user_emails(data=email)
+    print(run.id)
 
 @app.get("/")
 def root():
