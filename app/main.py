@@ -94,3 +94,7 @@ async def email(email: emailItem, background_task: BackgroundTasks):
 @app.get("/")
 def root():
     return "hello world"
+
+@app.post("/")
+def root():
+    return "hello world"
