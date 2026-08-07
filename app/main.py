@@ -8,21 +8,12 @@ import requests
 import os
 from upstash_redis import Redis
 import logging
-from celery import Celery
 
 load_dotenv()
 app = FastAPI()
 redis = Redis.from_env()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-
-celery_app = Celery(
-    "tasks",
-    broker=REDIS_URL,
-    backend=REDIS_URL
-)
-
 
 #  prompt-6-things
 #  1) role - role of agent (ex-1-you are a engineer responsible for reviewing code)(good) (ex-2-you are a genius enginner(bad)(should be genius))
@@ -94,14 +85,10 @@ async def emailWorkflowRun(data: emailItem):
     print(f"done {response.status_code}")
     logger.info(f"Task complted")
 
-@celery_app.task(name="tasks.process")
-async def process(data: emailItem):
-    await emailWorkflowRun(data)
-    return {"status": "completed"}
 
 @app.post("/email")
 async def email(email: emailItem, background_task: BackgroundTasks):
-    # background_task.add_task(emailWorkflowRun, email)
+    background_task.add_task(emailWorkflowRun, email)
     print("done")
 
 @app.get("/")
