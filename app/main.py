@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 class emailItem(BaseModel):
     data: str
     userId: str
+    noti: bool | None
 
 
 load_dotenv()   
@@ -80,8 +81,14 @@ async def emailWorkflowRun(data: emailItem):
                await asyncio.sleep(65)
 
     print("Step 2: Processing results... and calling backend API to store results in database")
+    dataNoti = False
+    if data.noti == None:
+        dataNoti = False
+    else:
+        dataNoti = True
+
     redis.set(f"{userId}-aiEmails", dumps(results), ex=3600)
-    response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": f"{userId}-aiEmails", "emails": f"{userId}-emails", "userId": userId}, headers={"Content-Type": "application/json"})
+    response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": f"{userId}-aiEmails", "emails": f"{userId}-emails", "userId": userId, "not": dataNoti}, headers={"Content-Type": "application/json"})
     print(f"done {response.status_code}")
     logger.info(f"Task complted")
 
