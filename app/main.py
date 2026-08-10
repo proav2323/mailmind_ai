@@ -89,7 +89,7 @@ async def emailWorkflowRun(data: emailItem):
 
     redis.set(f"{userId}-aiEmails", dumps(results), ex=3600)
     response = requests.post(f"{os.getenv('BACKEND_API_URL')}/emails/store", json={"data": f"{userId}-aiEmails", "emails": f"{userId}-emails", "userId": userId, "not": dataNoti}, headers={"Content-Type": "application/json"})
-    print(f"done {response.status_code}")
+    logger.info(f"done {response.status_code}")
     logger.info(f"Task complted")
 
 
