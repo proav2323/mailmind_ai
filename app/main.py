@@ -2,12 +2,30 @@ from fastapi import FastAPI, HTTPException, status, BackgroundTasks
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from json import loads, dumps
-import app.utils.ai as ai
+# import app.utils.ai as ai
+import utils.ai as ai
 import asyncio
 import requests
 import os
 from upstash_redis import Redis
 import logging
+
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+origins = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Adjust this to your specific NestJS URL later for security
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 load_dotenv()
 app = FastAPI()
