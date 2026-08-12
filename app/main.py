@@ -2,8 +2,8 @@ from fastapi import FastAPI, HTTPException, status, BackgroundTasks
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from json import loads, dumps
-# import app.utils.ai as ai
-import utils.ai as ai
+import app.utils.ai as ai
+# import utils.ai as ai
 import asyncio
 import requests
 import os
