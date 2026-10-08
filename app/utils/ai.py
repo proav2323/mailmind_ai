@@ -7,9 +7,6 @@ from google import genai
 from google.genai import types
 
 load_dotenv()
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-model="llama-3.1-8b-instant"
-
 geminiClinet = genai.Client()
 geminiModel="gemini-3.5-flash-lite"
 

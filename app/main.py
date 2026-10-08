@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from json import loads, dumps
 import app.utils.ai as ai
+import app.utils.email_agent as agent
 # import utils.ai as ai
 import asyncio
 import requests
@@ -65,6 +66,11 @@ class emailItem(BaseModel):
     noti: bool | None
     aiId: str
 
+class emailResponse(BaseModel):
+    messageId: str
+    userId: str
+    query: str
+
 
 load_dotenv()   
 def chunk_list(lst, size):
@@ -117,6 +123,14 @@ async def emailWorkflowRun(data: emailItem):
 async def email(email: emailItem, background_task: BackgroundTasks):
     background_task.add_task(emailWorkflowRun, email)
     print("done")
+
+@app.post("/write")
+async def write_email(email: emailResponse):
+    messages = redis.get(email.messageId)
+    if (messages == None):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Message not found"             )
+    data = await agent.getEmailWriteResponse(messages, email.query)
+    return data
 
 @app.get("/")
 def root():
