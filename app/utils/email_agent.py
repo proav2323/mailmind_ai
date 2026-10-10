@@ -70,7 +70,7 @@ async def getEmailWriteResponse(messages: list, query): # gemini response
     "accuracy": 0.7
     }}
     """
-    messages.insert(types.Content(role="user", parts=[types.Part.from_text(text=query)]))
+    messages.append(types.Content(role="user", parts=[types.Part.from_text(text=query)]))
     res = await geminiClient.aio.models.generate_content(model=geminiModel,contents=messages, config = types.GenerateContentConfig(
                 system_instruction=systemPrompt,
                 max_output_tokens=4000,
