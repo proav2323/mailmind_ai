@@ -126,7 +126,7 @@ async def email(email: emailItem, background_task: BackgroundTasks):
 
 @app.post("/write")
 async def write_email(email: emailResponse):
-    messages = redis.get(email.messageId)
+    messages = loads(redis.get(email.messageId))
     if (messages == None):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Message not found")
     data = await agent.getEmailWriteResponse(messages, email.query)
