@@ -130,7 +130,7 @@ async def write_email(email: emailResponse):
     if (messages == None):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Message not found")
     data = await agent.getEmailWriteResponse(messages, email.query)
-    redis.set(email.messageId, str(data['messages']))
+    redis.set(email.messageId, dumps(data['messages']))
     return {"success": "true"}
 
 @app.get("/")
