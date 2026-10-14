@@ -15,6 +15,7 @@ class Response(BaseModel):
     result: str
     feedback: str
     accuracy: float
+    type: str
 
 response_schema = Response.model_json_schema()
 
@@ -27,11 +28,12 @@ async def getEmailWriteResponse(messages: list, query): # gemini response
     - result: the output user you for
     - feedback: A brief explanation of the email's content and purpose. and how can it be improved.
     - accuracy: A score between 0 and 1 indicating how well the email meets the user's requirements.
+    - type: A type that you writing for user like if you are writing emailBody return 'body' if your writing email subject retrun 'subject'.
 
     don't add your own opinions or explanations outside of the JSON structure. strictly adhere to the schema and provide only the requested information.
     don't add your own information apart from user has given you
 
-    FALLBACK: IF USER QUESTIONS IS NOT RELATED TO EMAIL WRITING, RETURN RESULT: NULL, ACCURACY: 1, feedback: I CAN'T HELP YOU WITH THAT
+    FALLBACK: IF USER QUESTIONS IS NOT RELATED TO EMAIL WRITING, RETURN RESULT: NULL, ACCURACY: 1, feedback: I CAN'T HELP YOU WITH THAT, type: NULL
 
     EXAMPLES:
 
@@ -39,14 +41,16 @@ async def getEmailWriteResponse(messages: list, query): # gemini response
     output: {{
     "result": "suddent emergency makes me miss your wedding",
     "feedback": "you could be more specific why you can't attend your freinds weeding so, i can be accurate",
-    "accuracy": 0.5
+    "accuracy": 0.5,
+    "type": "body"
     }}
 
     input: i want ot buy a car.
     output: {{
     "result": null,
     "feedback": "I CAN'T HELP YOU WITH THAT",
-    "accuracy": 1
+    "accuracy": 1,
+    "type": null
     }}
 
     input: i want to buy a house, write a real estate agent, write a email body telling him/her that i want to buy a 3BHK house for my family.
@@ -67,7 +71,8 @@ async def getEmailWriteResponse(messages: list, query): # gemini response
 
     ",
     "feedback": "can be more specific with your family members, so i can be realistic if that house suits you or not or i tell the agent more details like what you should have in that house",
-    "accuracy": 0.7
+    "accuracy": 0.7,
+    "type": "body"
     }}
     """
     messages.append({"role": "user", "query": query})
